@@ -13,12 +13,12 @@ co2_raw
 # write C02 raw data to file
 write_csv(x = co2_raw, file = "data/raw/co2_data_raw.csv")
 
-#The environmental/economic/social indicators datasets are donwnloaded from the 
+#The development indicators for different countries are donwnloaded from the 
 # WorldBank website  (https://data.worldbank.org/indicator)
-# This website contains data for various different indicators for
-# different countries in different years. The 15 indicators I chose include
-# mainly 5 categories: Climate Change, Economy&Growth, Energy/Mining, and
-# Environment, Poverty
+# This website contains datasets for various different indicators for
+# different countries across last couple of decades. The 15 indicators I chose 
+# include mainly 5 categories: Climate Change, Economy&Growth, Energy/Mining,
+# and Environment, Poverty
 # The 18 indicators are: 1, GDP per capita; 2,Industry(value added % of GDP); 
 # 3, Agriculture, forestry, and fishing, value added (% of GDP);
 # 4, Agricultural land (% of land area); 5, Forest area (% of land area);

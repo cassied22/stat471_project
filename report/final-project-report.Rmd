@@ -1,5 +1,5 @@
 ---
-title: 'COVID-19 and County Health'
+title: 'CO2 and Country development indicatos'
 author: 'Seokyoon Chang, Jessica Mixon, Greta Maayan Waldman (Edited by Eugene Katsevich)'
 date: 'May 2, 2021'
 output:
