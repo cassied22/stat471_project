@@ -3,19 +3,14 @@ library(lubridate)
 library(tidyverse)
 
 # load raw case data
-case_data_raw = read_tsv(file = "data/raw/case_data_raw.tsv")
-
+co2_raw = read_csv(file = "data/raw/co2-data.csv")
+head(co2_raw)
 # clean case data
-case_data = case_data_raw %>%
-  na.omit() %>%                               # remove NA values
-  filter(year(date) == 2020) %>%              # keep data from 2020 
-  group_by(fips, county, state) %>%           # group by county
-  summarise(total_cases = sum(cases),         # total cases per county
-            total_deaths = sum(deaths)) %>%   # total deaths per county
-  ungroup() %>%
-  mutate(case_fatality_rate =                 # case_fatality_rate = 
-           total_deaths/total_cases*100) %>%  #  total_deaths/total_cases
-  select(-total_cases, -total_deaths)         # remove intermediate variables
+co2_raw = co2_raw %>%
+  filter(year >= 2010 & year <= 2020) %>%     # keep data from 2010 to 2020
+  select(iso_code, country, year, co2_per_capita) %>%  # keep country, iso_code, year, co2_per_capita columns
+  na.omit() 
+co2_raw
 
 # load raw county health data
 # (omitted from this template)
