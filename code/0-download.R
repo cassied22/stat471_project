@@ -23,7 +23,7 @@ write_csv(x = co2_raw, file = "data/raw/co2_data_raw.csv")
 # 3, Agriculture, forestry, and fishing, value added (% of GDP);
 # 4, Agricultural land (% of land area); 5, Forest area (% of land area);
 # 6, Mortality rate, under-5 (per 1,000 live births), 
-# 7, Terrestrial and marine protected areas (% of total territorial area),
+# 7, unemployment total,
 # 8, Urban population (% of total population)
 # 9, Alternative and nuclear energy (% of total energy use)
 # 10, Fossil fuel energy consumption (% of total)
