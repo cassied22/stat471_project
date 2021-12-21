@@ -122,6 +122,6 @@ p4
 ggsave(filename = "results/response-histogram-co2_vs_feature.png", 
        plot = p4, 
        device = "png", 
-       width = 15, 
-       height = 10)
+       width = 18, 
+       height = 13)
 

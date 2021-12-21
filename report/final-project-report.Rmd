@@ -1,7 +1,7 @@
 ---
-title: 'CO2 and Country development indicatos'
-author: 'Seokyoon Chang, Jessica Mixon, Greta Maayan Waldman (Edited by Eugene Katsevich)'
-date: 'May 2, 2021'
+title: 'CO2 and Country Development Indicators '
+author: 'Cassie Dai'
+date: 'Dec. 19, 2021'
 output:
   bookdown::pdf_document2:
     number_sections: yes
@@ -18,112 +18,130 @@ library(kableExtra)
 
 \bigskip
 
-The code to reproduce this report is available [on Github](https://github.com/Katsevich-Teaching/final-project-template).
+The code to reproduce this report is available [on Github](https://github.com/cassied22/stat471_project).
 
 \newpage
 
 # Executive Summary
 
-**Problem.** Despite the growing body of research focused on understanding the progression of COVID-19, there is still much to be learned about population-level health factors that make some populations more susceptible to COVID-19 spread, case severity, and mortality. Hence, for our final project, we decided to look into various measures of health across US counties and analyze which factors were most predictive of case fatality rate throughout 2020, the first year of the COVID-19 pandemic. While only analyzing 2020 COVID-19 data only inherently limits our results, we also note 2020 data may actually be most likely to reflect differences in healthcare quality across counties, as it was in the early months of the pandemic that many health systems faced unique issues of resource scarcity.
+**Problem.** The discussion centered around global warming and climate change has triggered much attention in the past decade. It has been widely recognized that human activities, mainly burning fossil fuels, are the main source of the increasing the amount of carbon dioxide in my atmosphere, amplifying the natural greenhouse effect and result in the increase of temperature on earth. While there have been extensive ongoing and past research projects exploring the science embedding global warming and greenhouse effect, the analysis relating the different development indicators of a country to its carbon dioxide emission have not been studied comprehensively.  Therefore, this project is aiming at exploring the relationship between various development indicators and the carbon dioxide per capita for a country, from which we will be able to draw implications about the development status of a country and the potential contribution to the global warming and thus offering some advice to the future policy aiming for mitigating CO2 emissions. 
 
-**Data.** Our dataset pulled data from two sources: a New York Times time series dataset which includes cumulative counts of COVID-19 cases and deaths at the county level, and data from County Health Rankings & Roadmaps, a program focused on collecting county-level data on a variety of health determinants. For the latter data source, we pulled 2019 or older data from various datasets on their website, as many key variables we wanted to study are still missing for 2020 and we assume that most county-level health determinants stayed very similar from 2019 to 2020. Our explanatory variables span the four main categories of health factors that the program identifies: health behaviors (e.g., smoking, sexual activity), clinical care (e.g., flu vaccine rate), social and economic factors (e.g., unemployment rate), and physical environment (e.g., degree of air pollution). Our primary response variable of interest was deaths per cases, which we created by dividing county-level deaths by count-level cases.
+**Data.** The datasets used in this project are pulled from two sources: a time series dataset which includes annual carbon dioxide emissions using different measures (such as annual co2 per capita, total co2, co2 per gdp and so on ) at the country level from OurWorldInData, and data from WorldBank collecting information about various indicators measuring the development status of a country. I kept the data from all available countries dating 2000 or later since there are too many missing values in the earlier years.
 
-**Analysis.** Before exploring our data or running any analyses, we split our data into a training dataset and a test dataset, with the test dataset reserved for assessing and comparing model performance. Then, we explored our data to check for normality assumptions necessary for linear regression and to assess correlations between variables and between variables and the response. In order to build an optimal predictive model, we then built six different cross-validated models: ordinary least squares, ridge regression, LASSO regression, elastic net regression, random forest, and boosting. Of the regression models, elastic net had the lowest test error and of the tree-based models, the boosted model had the lowest test error (as well as the lowest test error overall).
+From the list of indicators in WorldBank website, I chose 15 indicators spanning 4 major categories (Economy and Growth, Energy and Mining, Health and Environment) as explanatory variables. The response variable of interest is the annual CO2 emission per capita at the country-level. I used CO2 per capita instead of total CO2 emission to get rid of the population effect and all the indicators included are also independent of population.
 
-**Conclusions.** Interestingly, we found that the boosted and elastic net regression both pointed to similar types of variables as the strongest predictors of deaths per cases. Specifically, our optimal boosted model revealed that variables related to residential segregation and unemployment emerged as the most significant predictors, revealing that structural economic and health access inequalities were more predictive of COVID-19 deaths per cases than other variables. We hope that this analysis can inform policies aimed at improving health outcome determinants, both in the context of COVID-19 and more generally going forward. 
+
+**Analysis.** Before exploring my data or running any analyses, I split the data into a training dataset and a test dataset, with the test dataset reserved for assessing and comparing model performance. I then built 5 different models: ridge regression, LASSO regression, elastic net regression, random forest, and boosting. Of the regression models, ridge had the lowest test error (although the RMSE for the 3 regression models are very similar with the relative differences around $0.2%$) and of the tree-based models, the random forest model had the lowest test error (as well as the lowest test error overall).
+
+**Conclusions.** From the results of the models, while some features are consistently being the strong predictors for both random forest and boosting, the relative importances for many other features vary across different models, leading to much uncertainties as to whether these features are appropriate predictors for CO2 emission per capita.  There are 3 features that are among the strongest predictors for the response variable with both boosting and random forest, and also selected by lasso and elastic net regression: they are GDP per capita (`gdp`), renewable energy consumption (`renewable_energy`) and agriculture value added (`agriculture_value_added`). While the result I got so far reveal only limited information about the relationship between development status of a country and CO2 emission, it indeed demonstrates that there are some indicators that are closely related to the emission of carbon dioxide, thus providing directions for further analysis and potential policy-making advice in the context of global warming. 
+
 
 # Introduction
 
-**Background.** Coronavirus disease (COVID-19) has had a devastating global impact, with a cumulative total of 149,987,772 confirmed cases and 3,157,594 deaths worldwide as of April 28, 2021.^[Coronavirus Cases: Worldometer. (n.d.). https://www.worldometers.info/coronavirus/. 
-] About a fifth of these cases have been in the United States, with a recent count of 32,551,440 cases and 582,668 deaths.^[Ibid.] With these staggering numbers still increasing despite recent large-scale vaccine rollouts, it is of vital importance to utilize various data sources to understand both the progression of COVID-19 thus far as well as the highest risk factors for contracting COVID-19. Furthermore, a thorough analysis of COVID-19 rates and predictive factors may help inform strategies to improve public health policies that could mitigate the negative impact of a future pandemic, which many scientists say is not a matter of if but of when.^[Robbins, J. (2021, January 4). Heading Off the Next Pandemic. Kaiser Health News. https://khn.org/news/infectious-disease-scientists-preventing-next-pandemic/. ]
+**Background.** Global warming is a serious issue affecting the future of the entire earth and human kind.  In the past years, we've already seen many observable effects of global climate change including shrinking glaciers and shifting of animal/plant ranges. Moreover, there are range of published evidence indicating that the net damage costs of climate change are likely to be significant and to increase over time, bringing serious threat to the future generation. Given the urgency, significance and the difficulty of tackling and mitigating the global warming, efforts from both individuals and governments are needed. Through various international agreements and protocols such as Paris Agreement, many countries have in fact set up ambitious plans to reduce carbon emissions. At the same time, states also need to consider the needs for social and economy development, which sometimes might ask for quite opposite actions. In order to better accomplish the goals, it is therefore useful to explore the relationship between various development indicators and carbon dioxide emission so that we could have a better understanding on how to balance the requirements of carbon footprint reduction and country development. 
 
-Past research has shown that infectious diseases are influenced by a variety of factors. Obesity, for instance, is associated with a higher likelihood of contracting influenza A, and seasonal temperature changes have shown to be predictive of the 2003 severe acute respiratory syndrome (SARS).^[Tian, T., Zhang, J., Hu, L., Jiang, Y., Duan, C., Li, Z., ... & Zhang, H. (2021). Risk factors associated with mortality of COVID-19 in 3125 counties of the United States. Infectious diseases of poverty, 10(1), 1-8.] The CDC is currently in the process of identifying potential risk factors for severe COVID-19 illness,^[Centers for Disease Control and Prevention. (n.d.). Assessing Risk Factors for Severe COVID-19 Illness. Centers for Disease Control and Prevention. https://www.cdc.gov/coronavirus/2019-ncov/covid-data/investigations-discovery/assessing-risk-factors.html.] and some that have already been identified include heart disease, diabetes, and pregnancy.^[Centers for Disease Control and Prevention. (n.d.). Certain Medical Conditions and Risk for Severe COVID-19 Illness. Centers for Disease Control and Prevention. https://www.cdc.gov/coronavirus/2019-ncov/need-extra-precautions/people-with-medical-conditions.html.] Yet despite these efforts, there is still much to be learned. Specifically, there is still insufficient research to explain the differences in COVID-19 susceptibility and mortality that exist not just on the individual level but also on broader population levels. 
 
-**Analysis goals.** Given our knowledge of the capacity for a variety of factors to influence infectious disease spread as well as the fact that different counties in the US have differing levels of baseline health factors, we sought to investigate how rates of COVID-19 cases and deaths across the US are affected by various measures of community health. Specifically, we were interested in which kinds of factors (e.g., clinical, behavioral, health)—and which specific variables—are most predictive of deaths per cases (also known as case fatality rate). 
+**Analysis goals.** The goal of this project is to investigate the relationships between different development indicators and the CO2 emission at the country level. Specifically, I am interested in learning which factors are most relevant at predicting of the per capita carbon dioxide emission for a country.
 
-**Significance.** We hope that our analysis will contribute to the growing body of research on COVID-19 risk factors by expanding our understanding of COVID-19 and supporting efforts to mitigate the risk of future pandemics. Our results also shed light on the importance of analyzing social determinants of health in efforts to improve health outcomes. 
+**Significance.** I hope that this analysis will contribute to the growing research on climate change and greenhouse emissions by expanding our understanding of how different development indicators are correlated with the carbon dioxide emission so that we could give some implications about directions for future policy making targeting global warming. 
 
 # Data
 
 ## Data sources
 
-Our dataset merged data from two sources: a dataset on US county-level health and a COVID-19 dataset that includes average cases and deaths per county. Each data source includes data from January 2020 to December 2020. 
+The dataset I used for analysis were merged data from two sources: a dataset includes annual carbon dioxide emission for different countries over the past decades and the 15 time series datasets featuring the 15 indicators of interest for different countries.
 
-The data regarding the health status of each county comes from County Health Rankings & Roadmaps, a program founded by the Robert Wood Johnson Foundation in collaboration with the University of Wisconsin Population Health Institute.^[County Health Rankings & Roadmaps. (n.d.) https://www.countyhealthrankings.org/] The program was designed to support community leaders in fostering equitable health outcomes by raising awareness about the variety of factors that influence length and quality of life, including economic and social factors. Specifically, the program considers all of the counties in the United States and includes measures of health behaviors, clinical care, social and economic factors, and the physical environment. In order to ensure a wide variety of explanatory variables in our dataset across the aforementioned categories, we pulled variables from the compiled dataset available on the program’s website and merged these variables into our final dataset.^[County Health Rankings & Roadmaps. (n.d.) 2021 Measures. https://www.countyhealthrankings.org/explore-health-rankings/measures-data-sources/2021-measures]
+The datasets for the 15 explanatory variables come from WorldBank, which contains an extensive list of indicators measureing the development status of a country from many categories. I chose 15 indicators spanning 4 major categories (Economy and Growth, Energy and Mining, Health and Environment) and downloaded the relavent datasets. These datasets generally collect the indicator value for all countries spanning beginning from 1960 to 2020. However, there are many missing values depending on different indicators. ^[World Bank Indicators. (n.d.) https://data.worldbank.org/indicator]
 
-The other dataset we drew from is the New York Times COVID-19 tracking dataset that includes cumulative COVID-19 cases and deaths in the United States at the county level.^[The New York Times Github. (n.d.) nytimes/covid-19-data. https://github.com/nytimes/covid-19-data] This time series dataset, compiled from state and local governments and health departments, includes data beginning from the first reported coronavirus case in Washington on Jan. 21, 2020. Times notes that because of the widespread shortage of testing in the first few months of the pandemic, the true COVID-19 prevalence—for those few months especially—may not be accurately represented in the data.  
+
+The other dataset we drew from is the OurWorldInData CO2 emission dataset, which is sourced from the Global Carbon Project and releases a new update of CO2 emissions annually.^[OurWorldInData Github. (n.d.) https://github.com/owid/co2-data] This time series dataset includes data beginning from 1949.   
 
 ## Data cleaning
 
-Our central task in the data cleaning phase of the project was merging the data from the two sources described above. Both data sources provided their respective data on a county level (classified as a 5-digit FIPS code). For each county in the New York Times COVID-19 dataset, the numbers of deaths and cases of COVID-19 were aggregated across 2020. We merged the two datasets on the county level, and then calculated the explanatory variables in accordance with the County Health Rankings Data Documentation. For the most part, the latter step consisted of dividing raw counts of a variable by the population of interest for the variable to calculate a percentage. 
+Our central task in the data cleaning stage of the project was to merge the data from the two sources described above. Both sources provided their respective data annually on the country level (classified as a 3-character iso/country code).
+While the CO2 dataset has all emission per capita values in one column and `year` as another column, the indicator datasets have separate columns for each year.  Therefore, I first pivot-longer the indicators datasets so that they could match the style of the CO2 dataset. Then I merge them by country code and by year using inner join. I dropped the missing values from both datasets before merging and kept all the data points beginning from 2000 to 2020 since the older data were very sparse. 
 
 ## Data description
 
 ### Observations
 
-Our dataset has a total of 935 observations, corresponding to each of the counties included in our analysis.
+Our dataset has a total of 1888 observations, corresponding to the different countries in different years included in our analysis.
 
 ### Response Variable
 
-Our response variable is the cumulative COVID-19 deaths per cases for each county in the US. We created this variable via a simple mutate operation of cumulative cases per county divided by cumulative deaths per county. We use deaths per cases as our response variable as a proxy for case severity in different counties across the United States, as it inherently controls for population size variability. We do acknowledge, however, that using a single COVID-19 metric may not account for underlying heterogeneities between subgroups in each county, a bias that results from varied distributions within and between populations.^[U.S. News & World Report. (n.d.). COVID-19 Death Rate | Healthiest Communities. U.S. News & World Report. https://www.usnews.com/news/healthiest-communities/coronavirus-data/covid-death-rate?chart_type=line.]
+Our response variable is the annual CO2 emission per capita for each country in different years. I drew this variable directly from the raw CO2 dataset from OurWorldInData. I used CO2 emission per capita instead of total CO2 emission in order to exclude the impact of population. ^[OurWorldInData. (n.d.) https://ourworldindata.org/co2-emissions]
 
 ### Features
 
-Drawing on data from County Health Rankings & Roadmaps, we included 41 explanatory variables in our analysis, which fall into four main categories: health behaviors, clinical care, social and economic factors, and physical environment. For a detailed specification of these variables, refer to Appendix \@ref(appendix).
+From WorldBank's list of development indicators, I included 15 explanatory variables in my analysis, which fall into four main categories: Economy and Growth, Energy and Mining, Health and Environment. For a detailed specification of these variables, refer to Appendix \@ref(appendix).
 
 ## Data allocation
 
-Before building our predictive models, we first removed observations from the dataset for which any variables had NA values. We decided to do this for consistency purposes, as some data analysis methods we employed require that no variables contain NA fields. We then split our dataset into two subsets: a training dataset used for building our predictive models and a test dataset used for evaluating our models. We used an 80-20 split, such that the training dataset consists of 80% of our observations and the dataset consists of 20% of our observations. Although this train-test split was performed separately for each class of methods, we utilized a random seed to ensure that each split led to the same results. 
+I split the dataset into two subsets: a training dataset used for building our predictive models and a test dataset used for evaluating our models. I used all the observation earlier than 2012 as training set (which is approximately 78% of the total dataset) and the remaining observations as testing set. 
 
 ## Data exploration
 
 ### Response
 
-We first sought to understand the response variable’s distribution. As seen in the histogram of deaths variable (Figure \@ref(fig:response-histogram)), the data appears to be right-skewed, with some counties exceeding a death per cases rate of 0.1.  The median deaths per cases is 0.018. We proceeded to determine which counties had extreme response rates by looking at the sorted data. The sorted data (Table \@ref(tab:top-10-counties)) shows that aggregated across 2020, the highest rates of deaths per cases were primarily in northeastern states such as New York, New Jersey, and Connecticut.
+I first sought to understand the response variable’s distribution. As seen in the histogram of CO2-per capita (Figure \@ref(fig:response-histogram)), the data appears to be right-skewed, with few observations exceeding a annual CO2 per capita of 30 tonnes. The summary statistics for the CO2-per capita distribution is shown in Table \@ref(tab:summary) . I proceeded to determine which country/year had extreme response variable by looking at the sorted data. The sorted data (Table \@ref(tab:top-20-observations)) shows that Qatar in 2014 has the highest CO2 per capita. 
 
-```{r response-histogram, out.width = "80%", fig.cap = "Distribution of case-fatality rate; vertical dashed line indicates the median.", fig.align='center', echo = FALSE}
+```{r response-histogram, out.width = "80%", fig.cap = "Distribution of CO2 per capita; vertical dashed line indicates the median.", fig.align='center',  fig.pos = "H", echo = FALSE}
 knitr::include_graphics("../results/response-histogram.png")
 ```
 
-```{r top-10-counties, message = FALSE, echo = FALSE}
-read_tsv("../results/top-10-counties-data.tsv") %>%
+```{r summary, message = FALSE, echo = FALSE}
+read_tsv("../results/co2_summary.tsv") %>%
   kable(format = "latex", row.names = NA, 
         booktabs = TRUE, digits = 2, 
-        col.names = c("County", "State", "Case-fatality rate"),
-        caption = "Top ten counties by case-fatality rate 
-        (expressed as a percentage).") %>%
-  kable_styling(position = "center")
+        caption = "CO2 per capita summary statistics") %>%
+  kable_styling(position = "center") %>%
+  kable_styling(latex_options = "HOLD_position")
+```
+```{r top-20-observations, message = FALSE,  fig.pos = "H", echo = FALSE}
+read_tsv("../results/top-20-co2-data.tsv") %>%
+  kable(format = "latex", row.names = NA, 
+        booktabs = TRUE, digits = 2, 
+        caption = "Top 20 countries/years by CO2 per capita.") %>%
+  kable_styling(position = "center") %>%
+  kable_styling(latex_options = "HOLD_position")
+```
+I also determined distribution of mean CO2 per capita for each country(CO2 per capita averaged over different years for each country). The distribution of mean CO2 per capita are displayed in Figure \@ref(fig:top-10). This distribution is also right-skewed with a few countries having mean CO2 per capita over 20 tonnes.
+
+```{r top-10, out.width = "80%", fig.cap = "Distribution of mean CO2 per capita", fig.pos = "H", fig.align = "center",echo = FALSE}
+knitr::include_graphics("../results/response-histogram-co2_mean_country.png")
 ```
 
+I also determined the top 20 countries with highest mean CO2 per capita, and then plot the change of their annual CO2 per capita over time in Figure \@ref(fig:time). 
+```{r time, out.width = "80%", fig.cap = 'Change of CO2 per capita for top 20 countries with highest mean CO2 per capita over time', fig.align = "center",fig.pos = "H", echo = FALSE}
+knitr::include_graphics("../results/response-histogram-co2_country_over_year.png")
+```
 ### Features
 
-[Omitted from template.]
-
+I tried to plot each feature against the response variable in Figure \@ref(fig:feature). At first glance, it seems that there is a negative correlation between CO2 per capita and agriculture_value_added. The relationships between other features and CO2 per capita are difficult to tell. 
+```{r feature, out.width = "100%", fig.cap = 'Indicators vs. CO2 per capita', fig.pos = "H", fig.align = "center",echo = FALSE}
+knitr::include_graphics("../results/response-histogram-co2_vs_feature.png")
+```
 # Modeling
 
 ## Regression-based methods
 
-### Ordinary least squares
-
-[Omitted from template.]
 
 ### Penalized regression
 
-Despite the ordinary least squares method seeming to work well, we realized that fitting a linear model with so many explanatory variables might incur a large cost in variance and lead to suboptimal predictions. Hence, we decided to build and evaluate shrinkage models with the hopes of getting a more parsimonious and interpretable model. We ran three cross-validated regressions for which optimal values of lambda were chosen according to the one-standard-error rule: ridge, LASSO (Least Absolute Shrinkage and Selection Operator), and elastic net. 
+For the regression-based model, I ran three cross-validated regressions for which optimal values of lambda were chosen according to the one-standard-error rule: ridge, LASSO (Least Absolute Shrinkage and Selection Operator), and elastic net. 
 
 For the lasso, Figure \@ref(fig:lasso-CV-plot) shows the CV plot, Figure \@ref(fig:lasso-trace-plot) shows the trace plot, and Table \@ref(tab:lasso-coefficients) shows the selected features and their coefficients. 
 
-[Interpretation of lasso omitted from this template. Other penalized regression methods omitted from this template.]
 
 
-```{r lasso-CV-plot, out.width = "90%", fig.cap = "Lasso CV plot.", fig.align='center', echo = FALSE}
+```{r lasso-CV-plot, out.width = "90%", fig.cap = "Lasso CV plot.", fig.align='center',  fig.pos = "H",echo = FALSE}
 knitr::include_graphics("../results/lasso-cv-plot.png")
 ```
 
-```{r lasso-trace-plot, out.width = "90%", fig.cap = "Lasso trace plot.", fig.align='center', echo = FALSE}
+```{r lasso-trace-plot, out.width = "90%", fig.cap = "Lasso trace plot.", fig.align='center',  fig.pos = "H", echo = FALSE}
 knitr::include_graphics("../results/lasso-trace-plot.png")
 ```
-
+The trace plot for lasso shows that the 6 features with top coefficients are agriculture_value_added(negative relationship), gdp(positive relationship), natural_resources(positive relationship), export(positive relationship), industry(first positive then zero as lambda increase), renewable_energy(negative relationship).  
 ```{r lasso-coefficients, message = FALSE, echo = FALSE}
 read_tsv("../results/lasso-features-table.tsv") %>%
   kable(format = "latex", row.names = NA, 
@@ -131,16 +149,85 @@ read_tsv("../results/lasso-features-table.tsv") %>%
         col.names = c("Feature", "Coefficient"),
         caption = "Standardized coefficients for features in the lasso 
         model based on the one-standard-error rule.") %>%
-  kable_styling(position = "center")
+  kable_styling(position = "center") %>%
+  kable_styling(latex_options = "HOLD_position")
 ```
+Based on Table \@ref(tab:lasso-coefficients), there are 12 out of 15 features with non-zero coefficient. 
+
+For the ridge, Figure \@ref(fig:ridge-CV-plot) shows the CV plot, Figure \@ref(fig:ridge-trace-plot) shows the trace plot, and Table \@ref(tab:ridge-coefficients) shows the features and their coefficients. 
+```{r ridge-CV-plot, out.width = "90%", fig.cap = "Ridge CV plot.", fig.align='center',  fig.pos = "H",echo = FALSE}
+knitr::include_graphics("../results/ridge-cv-plot.png")
+```
+
+```{r ridge-trace-plot, out.width = "90%", fig.cap = "Ridge trace plot.", fig.align='center',  fig.pos = "H",echo = FALSE}
+knitr::include_graphics("../results/ridge-trace-plot.png")
+```
+The trace plot for ridge shows that the 6 features with top coefficients are agriculture_value_added(negative relationship), gdp(positive relationship), natural_resources(positive relationship), export(positive relationship), Birth_rate(negative relationship), renewable_energy(negative relationship).Among these 6 features, all but Birth_rate are the in the top features chosen by lasso plot with same sign of coefficient. 
+
+```{r ridge-coefficients, message = FALSE, echo = FALSE}
+read_tsv("../results/ridge-features-table.tsv") %>%
+  kable(format = "latex", row.names = NA, 
+        booktabs = TRUE, digits = 2, 
+        col.names = c("Feature", "Coefficient"),
+        caption = "Standardized coefficients for features in the ridge 
+        model based on the one-standard-error rule.") %>%
+  kable_styling(position = "center") %>%
+  kable_styling(latex_options = "HOLD_position")
+```
+
+For the elastic net regression, Figure \@ref(fig:en-CV-plot) shows the CV plot, Figure \@ref(fig:en-trace-plot) shows the trace plot, and Table \@ref(tab:en-coefficients) shows the selected features and their coefficients. 
+```{r en-CV-plot, out.width = "90%", fig.cap = "Elastic Net CV plot.", fig.align='center',  fig.pos = "H",echo = FALSE}
+knitr::include_graphics("../results/en-cv-plot.png")
+```
+
+```{r en-trace-plot, out.width = "90%", fig.cap = "Elastic Net trace plot.", fig.align='center', fig.pos = "H",echo = FALSE}
+knitr::include_graphics("../results/en-trace-plot.png")
+```
+The trace plot for elastic net shows that the 6 features with top coefficients are agriculture_value_added(negative relationship), gdp(positive relationship), fossil_fuel(first zero and then negative as lambda increase), export(positive relationship), Birth_rate(negative relationship), renewable_energy(negative relationship). Among these 6 features, all but Birth_rate are the in the top features chosen by lasso plot with same sign of coefficient. 
+```{r en-coefficients, message = FALSE,  fig.pos = "H",fig.pos = "H",echo = FALSE}
+read_tsv("../results/en-features-table.tsv") %>%
+  kable(format = "latex", row.names = NA, 
+        booktabs = TRUE, digits = 2, 
+        col.names = c("Feature", "Coefficient"),
+        caption = "Standardized coefficients for features in the elastic net
+        model based on the one-standard-error rule.") %>%
+  kable_styling(position = "center") %>%
+  kable_styling(latex_options = "HOLD_position")
+```
+
+Based on Table \@ref(tab:en-coefficients), there are 12 out of 15 features with non-zero coefficient. These features are exactly the same features selected by lasso regression. 
+
 
 ## Tree-based methods
 
-[Omitted from template.]
 
 ### Random forest
+For the random forest model, Figure \@ref(fig:rf-error-plot) shows the out-of-bag error as a function of number of trees , and Figure \@ref(fig:rf-importance-plot) shows the importance of different variables using two measures
+
+```{r rf-error-plot, out.width = "90%", fig.cap = "Random Forest out-of-bag error vs. number of trees", fig.align='center', fig.pos = "H",echo = FALSE}
+knitr::include_graphics("../results/rf-error-plot.png")
+```
+
+```{r rf-importance-plot, out.width = "90%", fig.cap = "Random Forest Variable Importance.", fig.align='center', fig.pos = "H",echo = FALSE}
+knitr::include_graphics("../results/rf-importance-plot.png")
+```
+The importance plot for random forest shows that the top 5 important features measured by %IncMSE are renewable_energy, agriculture_land, gdp, fossil_fuel, mortality, forest. The top 5 important features measured by IncNodePurity are agriculture_value_added, gdp, fossil_fuel, mortality, renewable energy. The two sets have 4 features in common, but differs in that first list contains agriculture_land while the second contains agriculture_value_added. It is also worth noting that while fossil_fuel and mortality are in both top 5 lists chosen by random forest, they are not selected by both elastic net regression and lasso regression as features with non-zero coefficients. (Practically, we know that fossil fuel consumption should be a relevant factor as burning fossil fuel directly emits CO2)
+
+
+
 
 ### Boosting
+
+For the boosting model, Figure \@ref(fig:gbm-cv-plot) shows the cv plot, and Figure \@ref(fig:gbm-importance-plot) shows the relative importance of different variables.
+
+```{r gbm-cv-plot, out.width = "90%", fig.cap = "Boosting CV plot", fig.align='center', fig.pos = "H",echo = FALSE}
+knitr::include_graphics("../results/gbm-cv-plot.png")
+```
+
+```{r gbm-importance-plot, out.width = "100%", fig.cap = "Boosting Variable Importance.", fig.align='center',fig.pos = "H", echo = FALSE}
+knitr::include_graphics("../results/gbm-relative-importance-plot.png")
+```
+The relative importance plot for boosting shows that the top 5 important features are renewable_energy, agriculture_land, gdp, agriculture_value_added, mortality. These features largely coincide with the top 5 features selected by random forest. Among them, renewable_energy, mortalityand gdp are also in top 5 features selected by random forest using both measures. agriculture_land and agriculture_value_added also exist in top 5 features selected by random forest using one of the measure.
 
 # Conclusions
 
@@ -151,106 +238,73 @@ read_tsv("../results/model-evaluation.tsv") %>%
   kable(format = "latex", row.names = NA,
         booktabs = TRUE, digits = 2,
         caption = "Root-mean-squared prediction errors for lasso and ridge regressions.") %>%
-  kable_styling(position = "center")
+  kable_styling(position = "center") %>%
+  kable_styling(latex_options = "HOLD_position")
 ```
 
-Table \@ref(tab:model-evaluation) shows the test RMSE for all the methods considered. Except for the OLS, the random forest and the boosted model have the lowest test errors. This is reasonable given these models’ tendencies to have high predictive accuracy. Between the two, the boosted model has the lowest test error, with a mean squared error of 0.000139, but it is closely followed by random forest, which has a mean squared error of 0.00141. Notably, however, the ridge, LASSO, and elastic net regressions perform about as well, with test MSEs of 0.000158, 0.000164, and 0.000161, respectively. Although OLS has the lowest training and test error, its adjusted R-squared value was only about 0.3, and there were too many features given the number of observations.
+Table \@ref(tab:model-evaluation) shows the test RMSE for all the methods considered. Random forest and boosting model have lower test errors than  the three regression models. This is reasonable given these models’ tendencies to have high predictive accuracy. Between the two, the random forest model has the lowest test error, with a mean squared error of 1.6719, and the followed by boosting model, which has a mean squared error of 2.39. Notably, the ridge, LASSO, and elastic has really close test error, with RMSEs of 3.4346,3.4424, and 3.4425, respectively.
 
-Regardless of these differences in test MSE, the methods overlap significantly in their identification of important variables from the larger set. For instance, the elastic net regression selects the following variables, which are also selected by LASSO and deemed significant in the OLS model: other providers ratio, unemployment, income inequality, housing overcrowding, residential segregation—non-White/White, homeownership, and physical inactivity. The random forest and boosting models both include low birthweight percentage, median income, and unemployment percentage in the top 10 most important variables, as measured by their contributions to node purity. 
+Regardless of these differences in test MSE, there are some variables, specifically gdp, agriculture_value_added and renewable_energy that have the highest importance as shown by both boosting and random forest, and are also selected by lasso and elastic net. However, the importance of many other features vary significantly depending on the models trained. 
+. 
 
 
 ## Takeaways
 
-Our results point to a few key determinants of health that, given their impact on COVID-19 deaths per cases rates in 2020, policymakers should consider when aiming to improve factors that would improve health overall but also potentially mitigate the mortality risk of another pandemic. The boosted model, which had the strongest predictive performance, suggests that residential segregation between non-white and white residents is the most important variable in predicting a county’s COVID-19 deaths per cases rate. The unemployment rate, availability of physical exercise opportunities, and measures of home ownership burden variables were also highly important in this model. These variables are identified across all models suggesting these relationships are robust. Residential segregation, unemployment, and home ownership burden are socioeconomic factors that affect an individual’s ability to access and pay for healthcare. In that regard, it is unsurprising that these factors would have a greater ability to predict differences in COVID-19 case fatalities across different counties in the United States. While some behavioral variables are also found to be significant (including STI incidence, high school completion, and others identified in the elastic net and lasso regressions), the variable importance ranking from the boosted model provides a highly interpretable hierarchy of the most influential factors from the greater set.
-
-Given that socioeconomic factors were the strongest predictors of deaths per cases, it appears that on the county level, COVID-19 rates are most associated with community healthcare burdens. That is, COVID-19 outcomes appear to reflect the reality of healthcare accessibility across counties; those with high percentages of uninsured citizens, or with high degrees of segregation and inequality, might feature division of healthcare resources that reflects these disparities. It is thus reasonable that deaths per case rates would be higher when significant groups of a population have lesser access to healthcare resources and treatment. Notably, if our conclusions are indeed correct, this effect would likely be pronounced in situations of scarcity such as the early months of the pandemic studied here, when many hospitals faced shortages of ventilators and other resource shortages. Given the progression of COVID-19 since 2021 as well as the inherent complexity of fatality incidence, we are hesitant to make any assertive claims about the true predictive capacity of any of the top factors we identified. Nonetheless, these results can help inform policies directed toward improving various determinants of important health outcomes in counties across the US.  
-
-As the world shifts towards herd immunity as vaccines are made more widely available, it is important to reflect upon how the pandemic has asymmetrically impacted different counties across the country. Our results suggest that structural vulnerabilities can be captured by measures of inequality and poverty; the identification of counties high on these factors should serve as a warning for future vulnerability to health crises. These analyses can serve to protect already vulnerable communities from suffering disproportionately in the future. 
+Although the result of my current analysis reveal rather limited information about the relationship between many development indicators chosen and the carbon dioxide emission per capita as their importance vary large depending on the models trained, we indeed found 3 variables that seems to related closely to the response variable, which points for further investigation to explore the correlations between more indicators and co2 emission. The three important variables found are gdp (per capita), agriculture_value_added and renewable_energy. GDP per capita is positively related to CO2 emission from the resulting coefficients of regression models, which confirms the complications of policy making as to balance the need for development and reduce carbon emissions.  On the other hand, it also confirms that more developed countries tend to have higher carbon emission per capita and therefore should put more efforts in tackling climate change.  Agriculture_value_added is negatively related to CO2 emission from the resulting coefficients of regression models, which suggests that countries with higher percentage of agriculture tends to have lower CO2 emission. The negative relationship between renewable energy and CO2 emission also confirms that with more use of renewable energy, CO2 emission tends to be lower. 
 
 
 ## Limitations
 
 ### Dataset limitations
-
-As it is detailed in the Frequently Asked Questions page of County Health Rankings & Roadmaps program  website,^[County Health Rankings & Roadmaps. (n.d.) Frequently Asked Questions. https://www.countyhealthrankings.org/explore-health-rankings/faq-page] all of the variables are from 2019 or earlier. Thus, it is possible that the values of the variables assessed were different in 2020, meaning that the interpretation of our analysis may need to be taken with a grain of salt. Regardless, given that we analyzed data on the county level, it is unlikely that any county experienced enough drastic change over the course of the year to significantly affect our analysis. Furthermore, our dataset has a large number of observations to account for potential variability, although notably, many observations had to be removed as some of the R packages used to build some of our models required that no NA values were present in the data. In other words, since each observation represents a different US county, many counties were left out of our analysis. Another limitation is that, as described in the Exploratory Data Analysis section, there is evidence of correlation amongst some of our explanatory variables. This means that some variables can be confounding variables, which mask or distort the relationship between measured variables. Also, variables selected in the LASSO regression and elastic net regression as well as variables marked important in the tree methods might be misleading in that, given how variable selection works, it is possible that some selected variables are simply representative of a larger group of correlated variables. 
+The indicators datasets contain different number of missing value depending on the countries and years. Since I dropped all the missing values when merging the data, some counties/years in which data are difficult to collect could be largely neglected. This would result that only some countries/years for which its indicators are easily obtainable are overrepresented, and could introduce spatial/time variability into the dataset. 
+ 
 
 ### Analysis limitations
 
-While splitting the data into training and testing datasets allows for a more unbiased test of the models, we recognize that our conclusions inherently contain some randomness due to the random split of the data. In other words, splitting the data again using a different random seed may have yielded different p-values in the OLS regression, different selected variables in the shrinkage methods, and different variables selected as important in the tree-based methods. Next, although we provide different methods for robust interpretation of the variables, our analysis incorporates only a specific subset of health related variables. The results of the analysis might change dramatically if we were to incorporate other variables. For example, as mentioned in the Exploratory Data Analysis, states in the northeastern part of the United States suffered from a high rate of COVID-19 cases and deaths in 2020. This may not have been because these states performed poorly in the health variables mentioned above. Rather, it may be due to the fact that these states are densely populated and hence were more susceptible to disease spread at the outset of the COVID-19 pandemic. In other words, other factors like geographic or demographic variables can hugely impact case fatality rate. 
+Although I used different methods for interpretation of the variables, my analysis incorporates only a very small subset of development indicators. The results of the analysis might change dramatically if we were to incorporate other variables. There might be many other indicators that are more closely related to the carbon dioxide emission and thus would be more appropriate explanatory variables for exploring the relationship between the development status of a country and the carbon dioxide emissions. In addition, although I did employ different models for analysis, there are other models that might have better performances for my project. The performance of the random forest and boosting also depend on the parameters chosen, the performance of the models could potentially be better if I tuned the hyperparameters.
 
 ## Follow-ups
 
-To compensate for the limitations mentioned above, more extensive analysis can be done as we acquire more data from 2020 and 2021. Not only can we extend our analysis by utilizing the most up-to-date datasets, but we can also examine how COVID-19 cases and deaths have affected various health factors of each county. In other words, the explanatory and response variables can be reversed to conduct more dynamic data analyses. Next, given that many observations needed to be omitted in our dataset as they contained NA fields, we recommend that our analyses be reconducted once the missing data is collected. Finally, future work on the social determinants of health in the context of COVID-19 might also look at different population levels such as states, bigger geographical regions in America, or even different countries.
+To compensate for the limitations mentioned above, more extensive analysis can be done as we acquire more data points in the future for more countries and expand the number of explanatory variables to incorporate more development indicators into our analysis. In addition, we could also try to tune the hyperparameters for the random forest and boosting model to achieve better results, or use more complex models such as neural network. 
 
 \appendix
 
 # Appendix: Descriptions of features {#appendix}
 
-Below are the 41 features we used for analysis. Words written in parentheses represent variable names. Unless noted otherwise, all variables are continuous. 
+Below are the 15 indicators I used for analysis. Words written in parentheses represent variable names. Unless noted otherwise, all variables are continuous. 
 
-**Health behaviors:** 
+**Economy & Growth:** 
 
-- *Tobacco Use*
-  - Adult smoking (`smoke_perc`): Percentage of adults who are current smokers.
-- *Diet and Exercise* 
-  - Adult obesity (`obesity_perc`): Percentage of the adult population (age 20 and older) reporting a body mass index (BMI) greater than or equal to 30 kg/m2.
-  - Food environment index (`food_environment`): Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
-  - Physical inactivity (`inactive_perc`): Percentage of adults age 20 and over reporting no leisure-time physical activity.
-  - Access to exercise opportunities (`physical_exercise_opportunities`): Percentage of population with adequate access to locations for physical activity
-  - Food insecurity (`Food_Insecure_perc`): Percentage of population who lack adequate access to food.
-  - Limited access to healthy foods (`limited_healthy_access`): Percentage of population who are low-income and do not live close to a grocery store.
-- *Alcohol & Drug Use*
-  - Excessive Drinking (`drinking_perc`): Percentage of adults reporting binge or heavy drinking.
-- *Sexual Activity*
-  - Sexually transmitted infections (`stis`): Number of newly diagnosed chlamydia cases per 100,000 population.
-  - Teen births (`teen_births`): Number of births per 1,000 female population ages 15-19.
-  - Low Birth Weight Percentage (`low_birthweight_percentage`): Percentage of live births with low birthweight (< 2,500 grams).
-
-**Clinical care:**
-
-- *Access to Care*
-  - Uninsured (`uninsured`): Percentage of population under age 65 without health insurance.
-  - Primary care physicians (`primarycare_ratio`): Ratio of population to primary care physicians.
-  - Dentists (`dentist_ratio`): Ratio of population to dentists. 
-  - Mental health providers (mentalhealth_ratio): Ratio of population to mental health providers.
-  - Other primary care providers (`otherproviders_ratio`): Ratio of population to primary care providers other than physicians.
-- *Quality of Care*
-  - Preventable hospital stays (`preventable_hospitalization`): Rate of hospital stays for ambulatory-care sensitive conditions per 100,000 Medicare enrollees.
-  - Mammography screening (`mammogram_perc`): Percentage of female Medicare enrollees ages 65-74 that received an annual mammography screening.
-  - Flu vaccinations (`flu_vaccine_perc`): Percentage of fee-for-service (FFS) Medicare enrollees that had an annual flu vaccination.
-  - Teen births (`teen_births`): Number of births per 1,000 female population ages 15-19.
-
-**Social and economic factors:** 
-
-- *Education*
-  - High school completion (`HS_completion`): Percentage of adults ages 25 and over with a high school diploma or equivalent.
-  - Some college (`some_college`): Percentage of adults ages 25-44 with some post-secondary education.
-  - Disconnected youth (`disconnected_youth`): Percentage of teens and young adults ages 16-19 who are neither working nor in school.
+- *GDP and Industry *
+  - GDP per capita (`gdp`): gross domestic product divided by midyear population, measured in current US dollars.
+  - Agriculture, forestry, and fishing, value added (`agriculture_value_added`): Agriculture, forestry, and fishing corresponds to ISIC divisions 1-3 and includes forestry, hunting, and fishing, as well as cultivation of crops and livestock production. Value added is the net output of a sector after adding up all outputs and subtracting intermediate inputs, measured in percentage of GDP. 
+  - Exports of goods and services (`export`): Exports of goods and services represent the value of all goods and other market services provided to the rest of the world, measured in percentage of GDP.
+  - Imports of goods and services (`import`): Imports of goods and services represent the value of all goods and other market services received from the rest of the world, measured in percentage of GDP. 
+  - Industry, value added (`industry`): Industry (including construction) corresponds to ISIC divisions 05-43 and includes manufacturing (ISIC divisions 10-33). It comprises value added in mining, manufacturing (also reported as a separate subgroup), construction, electricity, water, and gas. Value added is the net output of a sector after adding up all outputs and subtracting intermediate inputs, measured in percentage of GDP. 
+  
 - *Employment*
-  - Unemployment (`unemployment`): Percentage of population ages 16 and older who are unemployed but seeking work.
-- *Income* 
-  - Children in poverty (`children_poverty_percent`): Percentage of people under age 18 in poverty.
-  - Income inequality (`income_inequality`): Ratio of household income at the 80th percentile to income at the 20th percentile.
-  - Median household income (`median_income`): The income where half of households in a county earn more and half of households earn less.
-  - Children eligible for free or reduced price lunch (`children_freelunches`): Percentage of children enrolled in public schools that are eligible for free or reduced price lunch.
-- *Family & Social Support*
-  - Children in single-parent households (`single_parent_households`): Percentage of children that live in a household headed by a single parent.
-  - Social associations (`social_associations`): Number of membership associations per 10,000 residents. 
-  - Residential segregation—Black/White (`segregation_black_white`): Index of dissimilarity where higher values indicate greater residential segregation between Black and White county residents.
-  - Residential segregation—non-White/White (`segregation_nonwhite_white`): Index of dissimilarity where higher values indicate greater residential segregation between non-White and White county residents.
-- *Community Safety*
-  - Violent crime rate (`Violent_crime`) Number of reported violent crime offenses per 100,000 residents. 
+  - Unemployment rate (`unemployment`): Unemployment refers to the share of the labor force that is without work but available for and seeking employment.
 
-**Physical environment:**
 
-- *Air & Water Quality*
-  - Air pollution - particulate matter (`air_pollution`): Average daily density of fine particulate matter in micrograms per cubic meter (PM2.5).
-  - Drinking water violations (`water_violations`): Indicator of the presence of health-related drinking water violations. 1 indicates the presence of a violation, 0 indicates no violation.
-- *Housing & Transit*
-  - Housing overcrowding (`housing_overcrowding`): Percentage of households with overcrowding, 
-  - Severe housing costs (`high_housing_costs`): Percentage of households with high housing costs
-  - Driving alone to work (`driving_alone_perc`): Percentage of the workforce that drives alone to work.
-  - Long commute—driving alone (`long_commute_perc`): Among workers who commute in their car alone, the percentage that commute more than 30 minutes.
-  - Traffic volume (`traffic_volume`): Average traffic volume per meter of major roadways in the county.
-  - Homeownership (`homeownership`): Percentage of occupied housing units that are owned.
-  - Severe housing cost burden (`severe_ownership_cost`): Percentage of households that spend 50% or more of their household income on housing.
+**Environment:**
+
+- *Land Use*
+  - Forest Area (`forest`): Percentage of forest area in total land area. Forest refers to the land under natural or planted stands of trees of at least 5 meters in situ, whether productive or not, and excludes tree stands in agricultural production systems.
+  - Arable Area (`arable_land`): Percentage of arable land area in total land area. Arable land includes land defined by the FAO as land under temporary crops , temporary meadows for mowing or for pasture, land under market or kitchen gardens, and land temporarily fallow. 
+  - Agricultural land (`arable_land`): Percentage of Agricultural land area in total land area. Agricultural land refers to the share of land area that is arable, under permanent crops, and under permanent pastures. 
+
+- *Natural Resources*
+  - Total natural resources rents (`natural_resources`): Total natural resources rents are the sum of oil rents, natural gas rents, coal rents (hard and soft), mineral rents, and forest rents,measured in percentage of GDP.
+
+**Energy and Mining:** 
+
+- *Energy Use*
+  - Alternative and nuclear energy  (`alternative_energy`): Percentage of Alternative and nuclear energy in total energy use.
+  - Fossil fuel energy consumption (`fossil_fuel`): Percentage of fossil fuel energy consumption in total energy consumption. Fossil fuel comprises coal, oil, petroleum, and natural gas products.
+  - Renewable energy consumption (`renewable_energy`): Percentage of renewable energy consumption in total energy consumption.
+
+**Health:**
+
+- *Birth and Death*
+  - Birth rate, crude (`Birth_rate`): Crude birth rate indicates the number of live births occurring during the year, per 1,000 population estimated at midyear.
+  - Mortality Rate, under-5 (`mortality`): Under-five mortality rate is the probability per 1,000 that a newborn baby will die before reaching age five, if subject to age-specific mortality rates of the specified year.

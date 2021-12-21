@@ -75,4 +75,38 @@ beta_hat_std %>%
   arrange(desc(abs(coefficient))) %>% 
   write_tsv("results/lasso-features-table.tsv")
 
+# run elastic net regression
+set.seed(1)
+en_fit = cv.glmnet(co2_per_capita ~ . - country_year - iso_code - country - year,   
+                      alpha = 0.5,                 
+                      nfolds = 10,               
+                      data = co2_train)
+
+# save the lasso fit object
+save(en_fit, file = "results/en_fit.Rda")
+
+# create elastic net CV plot
+png(width = 6, 
+    height = 4,
+    res = 300,
+    units = "in", 
+    filename = "results/en-cv-plot.png")
+plot(en_fit)
+dev.off()
+
+# create elastic net trace plot
+p3 = plot_glmnet(en_fit, co2_train, features_to_plot = 6)
+ggsave(filename = "results/en-trace-plot.png", 
+       plot = p3, 
+       device = "png", 
+       width = 6, 
+       height = 4)
+p3
+# extract features selected by elastic net and their coefficients
+beta_hat_std_en = extract_std_coefs(en_fit, co2_train)
+beta_hat_std_en %>%
+  filter(coefficient != 0) %>%
+  arrange(desc(abs(coefficient))) %>% 
+  write_tsv("results/en-features-table.tsv")
+
 

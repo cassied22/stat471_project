@@ -81,5 +81,5 @@ p
 ggsave(filename = "results/gbm-relative-importance-plot.png", 
        plot = p, 
        device = "png", 
-       width = 15, 
+       width = 18, 
        height = 6)
