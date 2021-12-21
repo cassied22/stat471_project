@@ -4,6 +4,7 @@ library(cowplot)                        # for side by side plots
 library(lubridate)                      # for dealing with dates
 library(maps)                           # for creating maps
 library(tidyverse)
+library('plot.matrix')
 
 # read in the cleaned data
 co2_data = read_csv("data/clean/co2_data.csv")
@@ -124,4 +125,22 @@ ggsave(filename = "results/response-histogram-co2_vs_feature.png",
        device = "png", 
        width = 18, 
        height = 13)
+co2_data
 
+# covariance between features 
+features = co2_data %>% select(-c(country_year, country,iso_code,year,co2_per_capita))
+features
+
+cor_f = cor(features)
+
+png(width = 15, 
+    height = 15,
+    res = 300,
+    units = "in", 
+    filename = "results/covariance.png")
+plot(cor_f,digits=2, text.cell=list(cex=0.5))
+dev.off()
+
+# std of co2 per capita
+sd_co2 = sd(co2_data$co2_per_capita)
+sd_co2

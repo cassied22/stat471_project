@@ -69,7 +69,7 @@ Our dataset has a total of 1888 observations, corresponding to the different cou
 
 ### Response Variable
 
-Our response variable is the annual CO2 emission per capita for each country in different years. I drew this variable directly from the raw CO2 dataset from OurWorldInData. I used CO2 emission per capita instead of total CO2 emission in order to exclude the impact of population. ^[OurWorldInData. (n.d.) https://ourworldindata.org/co2-emissions]
+Our response variable is the annual CO2 emission per capita for each country in different years. It is continues variable. I drew this variable directly from the raw CO2 dataset from OurWorldInData. I used CO2 emission per capita instead of total CO2 emission in order to exclude the impact of population. ^[OurWorldInData. (n.d.) https://ourworldindata.org/co2-emissions]
 
 ### Features
 
@@ -83,7 +83,7 @@ I split the dataset into two subsets: a training dataset used for building our p
 
 ### Response
 
-I first sought to understand the response variable’s distribution. As seen in the histogram of CO2-per capita (Figure \@ref(fig:response-histogram)), the data appears to be right-skewed, with few observations exceeding a annual CO2 per capita of 30 tonnes. The summary statistics for the CO2-per capita distribution is shown in Table \@ref(tab:summary) . I proceeded to determine which country/year had extreme response variable by looking at the sorted data. The sorted data (Table \@ref(tab:top-20-observations)) shows that Qatar in 2014 has the highest CO2 per capita. 
+I first sought to understand the response variable’s distribution. As seen in the histogram of CO2-per capita (Figure \@ref(fig:response-histogram)), the data appears to be right-skewed, with few observations exceeding a annual CO2 per capita of 30 tonnes. The summary statistics for the CO2-per capita distribution is shown in Table \@ref(tab:summary) . The standard deviation for CO2 per capita is 5.31. I proceeded to determine which country/year had extreme response variable by looking at the sorted data. The sorted data (Table \@ref(tab:top-20-observations)) shows that Qatar in 2014 has the highest CO2 per capita. 
 
 ```{r response-histogram, out.width = "80%", fig.cap = "Distribution of CO2 per capita; vertical dashed line indicates the median.", fig.align='center',  fig.pos = "H", echo = FALSE}
 knitr::include_graphics("../results/response-histogram.png")
@@ -121,6 +121,12 @@ I tried to plot each feature against the response variable in Figure \@ref(fig:f
 ```{r feature, out.width = "100%", fig.cap = 'Indicators vs. CO2 per capita', fig.pos = "H", fig.align = "center",echo = FALSE}
 knitr::include_graphics("../results/response-histogram-co2_vs_feature.png")
 ```
+The correlation between different features are shown in Figure \@ref(fig:covariance).
+
+```{r covariance, out.width = "80%", fig.cap = 'Correlation Maxtrix', fig.pos = "H", fig.align = "center",echo = FALSE}
+knitr::include_graphics("../results/covariance.png")
+```
+
 # Modeling
 
 ## Regression-based methods
